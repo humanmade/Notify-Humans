@@ -42,10 +42,9 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 
 		// @todo validate the sender is who they say they are
 		if ( ! empty( $_SERVER['REMOTE_HOST'] ) )
-			$event_args['host'] = sanitize_text_field( $_SERVER['REMOTE_HOST'] );
-		else
-			$event_args['host'] = sanitize_text_field( $_SERVER['HTTP_HOST'] );
+			$event_args['remote_host'] = sanitize_text_field( $_SERVER['REMOTE_HOST'] );
 
+		$event_args['remote_ip'] = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP );
 
 		$event = new Notify_Event( $event_args );
 		$ret = $event->save();

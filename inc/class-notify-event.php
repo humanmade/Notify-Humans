@@ -25,6 +25,16 @@ class Notify_Event {
 	}
 
 	/**
+	 * Get the remote IP address for this event
+	 */
+	public function get_remote_ip() {
+		if ( ! empty( $this->data->remote_ip ) )
+			return $this->data->remote_ip;
+		else
+			return false;
+	}
+
+	/**
 	 * Save the details associated with this event
 	 */
 	public function save() {
@@ -35,7 +45,8 @@ class Notify_Event {
 				'event'          => null,
 				'detail'         => null,
 				'message'        => null,
-				'host'           => null,
+				'remote_host'    => null,
+				'remote_ip'      => null,
 				'timestamp'      => date( "Y-m-d H:i:s" ),
 			);
 		$data = array_merge( $defaults, (array)$this->data );
@@ -43,12 +54,19 @@ class Notify_Event {
 		if ( empty( $data['event'] ) )
 			return new WP_Error( 'invalid-arguments', "'event' is a required argument." );
 
+		if ( ! empty( $data['remote_ip'] ) )
+			$data['remote_ip'] = ip2long( $data['remote_ip'] );
+
+
 		if ( empty( $data['id'] ) ) {
 			$ret = $wpdb->insert( $wpdb->notify_events, $data );
 			$data['id'] = (int) $wpdb->insert_id;
 		} else {
 			$ret = $wpdb->update( $wpdb->notify_events, $data, array( 'id' => $data['id'] ) );
 		}
+
+		if ( ! empty( $data['remote_ip'] ) )
+			$data['remote_ip'] = long2ip( $data['remote_ip'] );
 
 		if ( $ret ) {
 			$this->data = (object)$data;
@@ -65,10 +83,13 @@ class Notify_Event {
 		global $wpdb;
 
 		$event = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->notify_events WHERE id=%s", $id ) );
-		if ( is_object( $event ) )
+		if ( is_object( $event ) ) {
+			if ( ! empty( $event->remote_ip ) )
+				$event->remote_ip = long2ip( $event->remote_ip );
 			return $event;
-		else
+		} else {
 			return false;
+		}
 	}
 
 }
