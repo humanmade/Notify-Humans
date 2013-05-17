@@ -49,17 +49,29 @@ class Notify_Humans {
 		$this->plugin_dir     = apply_filters( 'notify_humans_plugin_dir_path',  plugin_dir_path( $this->file ) );
 		$this->plugin_url     = apply_filters( 'notify_humans_plugin_dir_url',   plugin_dir_url ( $this->file ) );
 
-		$this->extend         = new stdClass();
-
 	}
 
 	private function includes() {
+
+		require_once( $this->plugin_dir . 'inc/class-notify-humans-of-events.php' );
 
 	}
 
 	private function setup_actions() {
 
+		if ( ! function_exists( 'hm_add_rewrite_rule' ) ) {
+			add_action( 'admin_notices', array( $this, 'admin_notices_missing_hm_rewrites' ) );
+			return;
+		}
+
 		do_action_ref_array( 'notify_humans_after_setup_actions', array( &$this ) );
+	}
+
+	/**
+	 * Notify Humans is dependent on HM Rewrites
+	 */
+	public function admin_notices_missing_hm_rewrites() {
+		echo '<div class="error"><p>' . __( 'Please install HM Rewrites for Notify Humans to work properly', 'notify-humans' ) . '</p></div>';
 	}
 
 }
