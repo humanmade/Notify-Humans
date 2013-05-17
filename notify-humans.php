@@ -54,6 +54,7 @@ class Notify_Humans {
 	private function includes() {
 
 		require_once( $this->plugin_dir . 'inc/class-notify-humans-of-events.php' );
+		require_once( $this->plugin_dir . 'inc/class-notify-event.php' );
 
 	}
 
@@ -64,7 +65,20 @@ class Notify_Humans {
 			return;
 		}
 
+		add_action( 'init', array( $this, 'action_init_register_tables' ) );
+
 		do_action_ref_array( 'notify_humans_after_setup_actions', array( &$this ) );
+	}
+
+	/**
+	 * To log our events and actions in the database, we must ensure the
+	 * database exists
+	 */
+	public function action_init_register_tables() {
+		global $wpdb;
+
+		$wpdb->tables[] = 'notify_events';
+		$wpdb->notify_events = $wpdb->prefix . 'notify_events';
 	}
 
 	/**
@@ -72,6 +86,17 @@ class Notify_Humans {
 	 */
 	public function admin_notices_missing_hm_rewrites() {
 		echo '<div class="error"><p>' . __( 'Please install HM Rewrites for Notify Humans to work properly', 'notify-humans' ) . '</p></div>';
+	}
+
+	/**
+	 * Do a response to a request
+	 *
+	 * @param string  $status         'success', 'error', or a custom status
+	 * @param string  $message        Message to include with response (optional)
+	 * @param int     $status_header  HTTP status header (optional)
+	 */
+	public static function do_json_response( $status, $message = '', $status_header = false ) {
+		HM_Rewrite::do_json_response( $status, $message, $status_header );
 	}
 
 }
