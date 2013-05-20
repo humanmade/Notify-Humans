@@ -91,12 +91,11 @@ class Notify_Humans {
 	/**
 	 * Do a response to a request
 	 *
-	 * @param string  $status         'success', 'error', or a custom status
+	 * @param int     $status         HTTP status header
 	 * @param string  $message        Message to include with response (optional)
-	 * @param int     $status_header  HTTP status header (optional)
 	 */
-	public static function do_json_response( $status, $message = '', $status_header = false ) {
-		HM_Rewrite::do_json_response( $status, $message, $status_header );
+	public static function do_response( $status, $message = '' ) {
+		HM_Rewrite::do_response( $status, $message );
 	}
 
 }

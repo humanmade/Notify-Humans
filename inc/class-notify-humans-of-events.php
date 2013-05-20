@@ -30,26 +30,33 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 		if ( ! $notify )
 			Notify_Humans()->do_json_response( 'error', __( 'Invalid event specified.', 'notify-humans' ) );
 
+
+		// Parse the payload. Because we don't know what it is necessarily,
+		// we'll need to handle it safely later.
+		if ( isset( $_REQUEST ) ) {
+			if ( is_array( $_REQUEST ) )
+				$payload = json_encode( $_REQUEST );
+			else
+				$payload = $_REQUEST;
+		} else {
+			$payload = null;
+		}
+
+
 		$event_args = array(
 				'event'       => $notify,
-				'detail'      => null,
-				'message'     => null,
+				'payload'     => $payload,
+				'remote_ip'   => filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP ),
 			);
-		foreach( $event_args as $key => $value ) {
-			if ( ! empty( $_POST[$key] ) )
-				$event_args[$key] = sanitize_text_field( $_POST[$key] );
-		}
 
 		// @todo validate the sender is who they say they are
 		if ( ! empty( $_SERVER['REMOTE_HOST'] ) )
 			$event_args['remote_host'] = sanitize_text_field( $_SERVER['REMOTE_HOST'] );
 
-		$event_args['remote_ip'] = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP );
-
 		$event = new Notify_Event( $event_args );
 		$ret = $event->save();
 
-		Notify_Humans()->do_json_response( 'success', __( 'Event logged. Thanks for telling us about it.', 'notify-humans' ) );		
+		Notify_Humans()->do_response( 200, __( 'Event logged. Thanks for telling us about it.', 'notify-humans' ) );		
 	}
 
 }

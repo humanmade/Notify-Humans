@@ -43,8 +43,7 @@ class Notify_Event {
 		$defaults = array(
 				'id'             => null,
 				'event'          => null,
-				'detail'         => null,
-				'message'        => null,
+				'payload'        => null,
 				'remote_host'    => null,
 				'remote_ip'      => null,
 				'timestamp'      => date( "Y-m-d H:i:s" ),
@@ -56,7 +55,6 @@ class Notify_Event {
 
 		if ( ! empty( $data['remote_ip'] ) )
 			$data['remote_ip'] = ip2long( $data['remote_ip'] );
-
 
 		if ( empty( $data['id'] ) ) {
 			$ret = $wpdb->insert( $wpdb->notify_events, $data );
