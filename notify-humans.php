@@ -142,8 +142,24 @@ class Notify_Humans {
 	public function action_init_register_tables() {
 		global $wpdb;
 
+		$table_name = $wpdb->prefix . 'notify_events';
+		if ( is_admin() ) {
+			// Maybe create the table(s)
+			if ( ! (bool)$wpdb->query( $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name ) ) ) {
+				$wpdb->query( "CREATE TABLE `{$table_name}` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) NOT NULL DEFAULT '',
+  `payload` text,
+  `remote_host` varchar(255) DEFAULT NULL,
+  `remote_ip` int(10) unsigned DEFAULT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;" );
+			}
+		}
+
 		$wpdb->tables[] = 'notify_events';
-		$wpdb->notify_events = $wpdb->prefix . 'notify_events';
+		$wpdb->notify_events = $table_name;
 	}
 
 	/**
