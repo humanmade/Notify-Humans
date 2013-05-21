@@ -30,6 +30,7 @@ class Notify_IRC_Action {
 		fwrite( $connection, "USER " . $this->data->user . PHP_EOL );
 		fwrite( $connection, "NICK " . $this->data->nick . PHP_EOL );
 
+		fwrite( $connection, "JOIN " . $room . PHP_EOL );
 		fwrite( $connection, "PRIVMSG " . $room . " :" . $message . PHP_EOL );
 
 		while ( $data = fgets( $connection, 128 ) ) {
