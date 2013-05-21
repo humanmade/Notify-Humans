@@ -34,10 +34,11 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 		// Parse the payload. Because we don't know what it is necessarily,
 		// we'll need to handle it safely later.
 		if ( isset( $_REQUEST ) ) {
-			if ( is_array( $_REQUEST ) )
-				$payload = json_encode( $_REQUEST );
+			$request = stripslashes_deep( $_REQUEST );
+			if ( is_array( $request ) )
+				$payload = json_encode( $request );
 			else
-				$payload = $_REQUEST;
+				$payload = $request;
 		} else {
 			$payload = null;
 		}
