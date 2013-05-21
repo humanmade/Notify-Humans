@@ -77,6 +77,21 @@ class Notify_Humans {
 	}
 
 	/**
+	 * A way of notifying ourselves of an event.
+	 * Useful for when the action execution (e.g. IRC)
+	 * may take longer than we want.
+	 */
+	public function of( $event, $payload = false ) {
+
+		$args = array(
+				'blocking'     => false,
+			);
+		if ( $payload )
+			$args['body'] = $payload;
+		wp_remote_post( home_url( '/of/' . $event . '/' ), $args );
+	}
+
+	/**
 	 * Start a new recipe
 	 *
 	 * @param string      $event     Event to start the recipe with
