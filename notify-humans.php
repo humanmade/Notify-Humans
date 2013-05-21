@@ -53,8 +53,14 @@ class Notify_Humans {
 
 	private function includes() {
 
-		require_once( $this->plugin_dir . 'inc/class-notify-humans-of-events.php' );
+		// Basic object classes
 		require_once( $this->plugin_dir . 'inc/class-notify-event.php' );
+		require_once( $this->plugin_dir . 'inc/class-notify-recipe.php' );
+
+		// Reusable actions
+		require_once( $this->plugin_dir . 'inc/class-notify-irc-action.php' );
+
+		require_once( $this->plugin_dir . 'inc/class-notify-humans-of-events.php' );
 
 	}
 
@@ -68,6 +74,65 @@ class Notify_Humans {
 		add_action( 'init', array( $this, 'action_init_register_tables' ) );
 
 		do_action_ref_array( 'notify_humans_after_setup_actions', array( &$this ) );
+	}
+
+	/**
+	 * Start a new recipe
+	 *
+	 * @param string      $event     Event to start the recipe with
+	 */
+	public function if_event( $event ) {
+		$recipe = new Notify_Recipe;
+		$recipe->set_event( $event );
+		$this->data['current_recipe'] = $recipe;
+		return self::$instance;
+	}
+
+	/**
+	 * Add an action to the current recipe, then save it
+	 *
+	 * @param            $action    Action to end the recipe with
+	 */
+	public function then_action( $action ) {
+
+		$recipe = $this->data['current_recipe'];
+		if ( empty( $recipe ) )
+			return false;
+
+		unset( $this->data['current_recipe'] );
+		$recipe->set_action( $action );
+
+		if ( ! isset( $this->data['recipes'] ) )
+			$this->data['recipes'] = array();
+
+		$this->data['recipes'][] = $recipe;
+		return true;
+	}
+
+	/**
+	 * Do actions for an event.
+	 *
+	 * @todo return the WP_Errors we potentially collected
+	 *
+	 * @param obj              $event     The event object
+	 * @return true|WP_Error   $result    True on success, WP_Error on a failure.
+	 */
+	public function do_event_actions( $event ) {
+
+		if ( ! is_a( $event, 'Notify_Event' ) )
+			return new WP_Error( 'invalid-event', __( 'Event is not valid.', 'notify-humans' ) );
+
+		$actions = wp_filter_object_list( $this->data['recipes'], array( 'event' => $event->get_slug() ) );
+
+		$ret = array();
+		foreach( $actions as $recipe ) {
+			$func_ret = call_user_func_array( $recipe->action, array( $event ) );
+			if ( is_wp_error( $func_ret ) )
+				$ret[] = $func_ret;
+		}
+
+		if ( empty( $ret ) )
+			return true;
 	}
 
 	/**

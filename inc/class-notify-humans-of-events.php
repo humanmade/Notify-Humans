@@ -44,7 +44,7 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 
 
 		$event_args = array(
-				'event'       => $notify,
+				'slug'       => $notify,
 				'payload'     => $payload,
 				'remote_ip'   => filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP ),
 			);
@@ -55,8 +55,14 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 
 		$event = new Notify_Event( $event_args );
 		$ret = $event->save();
+		if ( is_wp_error( $ret ) )
+			Notify_Humans()->do_response( 500, $ret->get_error_message() );
 
-		Notify_Humans()->do_response( 200, __( 'Event logged. Thanks for telling us about it.', 'notify-humans' ) );		
+		$ret = Notify_Humans()->do_event_actions( $event );
+		if ( is_wp_error( $ret ) )
+			Notify_Humans()->do_response( 500, $ret->get_error_message() );
+
+		Notify_Humans()->do_response( 200, __( 'Event logged and actions triggered. Thanks for telling us about it.', 'notify-humans' ) );		
 	}
 
 }

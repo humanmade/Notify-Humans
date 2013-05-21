@@ -25,6 +25,26 @@ class Notify_Event {
 	}
 
 	/**
+	 * Get the slug for this event
+	 */
+	public function get_slug() {
+		if ( ! empty( $this->data->slug ) )
+			return $this->data->slug;
+		else
+			return false;
+	}
+
+	/**
+	 * Get the payload for this event
+	 */
+	public function get_payload() {
+		if ( ! empty( $this->data->payload ) )
+			return $this->data->payload;
+		else
+			return false;
+	}
+
+	/**
 	 * Get the remote IP address for this event
 	 */
 	public function get_remote_ip() {
@@ -42,7 +62,7 @@ class Notify_Event {
 
 		$defaults = array(
 				'id'             => null,
-				'event'          => null,
+				'slug'           => null,
 				'payload'        => null,
 				'remote_host'    => null,
 				'remote_ip'      => null,
@@ -50,8 +70,8 @@ class Notify_Event {
 			);
 		$data = array_merge( $defaults, (array)$this->data );
 
-		if ( empty( $data['event'] ) )
-			return new WP_Error( 'invalid-arguments', "'event' is a required argument." );
+		if ( empty( $data['slug'] ) )
+			return new WP_Error( 'invalid-arguments', "'slug' is a required argument." );
 
 		if ( ! empty( $data['remote_ip'] ) )
 			$data['remote_ip'] = ip2long( $data['remote_ip'] );
