@@ -33,16 +33,18 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 
 		// Parse the payload. Because we don't know what it is necessarily,
 		// we'll need to handle it safely later.
-		if ( isset( $_REQUEST ) ) {
+		$payload = array();
+
+		if ( ! empty( $_REQUEST ) ) {
 			$request = stripslashes_deep( $_REQUEST );
-			if ( is_array( $request ) )
-				$payload = json_encode( $request );
-			else
-				$payload = $request;
-		} else {
-			$payload = null;
+			$payload['request'] = $request;
 		}
 
+		if( $stdin = file_get_contents('php://input') ) {
+			$payload['input'] = $stdin;
+		}
+
+		$payload = json_encode( $payload );
 
 		$event_args = array(
 				'slug'       => $notify,
