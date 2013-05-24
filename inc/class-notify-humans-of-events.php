@@ -39,7 +39,7 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 		} elseif ( $stdin = file_get_contents( 'php://input' ) ) {
 			$payload = $stdin;
 		} elseif ( ! empty( $_GET ) ) {
-			$payload = $_GET;
+			$payload = stripslashes_deep( $_GET );
 		} else {
 			$payload = null;
 		}
