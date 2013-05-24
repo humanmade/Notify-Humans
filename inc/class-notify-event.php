@@ -39,7 +39,7 @@ class Notify_Event {
 	 */
 	public function get_payload() {
 		if ( ! empty( $this->data->payload ) )
-			return $this->data->payload;
+			return json_decode( $this->data->payload );
 		else
 			return false;
 	}
