@@ -158,7 +158,13 @@ class Notify_Humans {
 
 				$events = Notify_Event::query( array( 'slug' => $event->get_slug(), 'timestamp_query' => array( 'operator' => '>=', 'timestamp' => strtotime( '-' . $recipe->occurrences[1] ) ) ) );
 
+				// if we have less than the desired amount, reject this recipe
 				if ( count( $events ) < $recipe->occurrences[0] )
+					return false;
+
+				// only reject this recipe if there is no filter callback to make 
+				// further changes to the number of matched events
+				if ( ! $recipe->filter_callback && count( $events ) !== $recipe->occurrences[0] )
 					return false;
 			
 			} else {
@@ -176,8 +182,8 @@ class Notify_Humans {
 				if ( ! $events )
 					return false;
 
-				// if it's there is an occurance filter too, re-check we meet that requirement
-				if ( $recipe->occurrences && count( $events ) < $recipe->occurrences[0] )
+				// if there is an occurance filter too, re-check we meet that requirement
+				if ( $recipe->occurrences && count( $events ) === $recipe->occurrences[0] )
 					return false;
 			}
 
