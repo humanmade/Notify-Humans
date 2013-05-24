@@ -34,10 +34,10 @@ class Notify_Humans_Of_Events extends Notify_Humans {
 		// Parse the payload. Because we don't know what it is necessarily,
 		// we'll need to handle it safely later.
 
-		if ( $stdin = file_get_contents( 'php://input' ) ) {
+		if ( ! empty( $_POST ) ) {
+			$payload = $_POST;
+		} elseif ( $stdin = file_get_contents( 'php://input' ) ) {
 			$payload = $stdin;
-		} elseif ( ! empty( $_POST ) ) {
-			$payload = stripslashes_deep( $_POST );
 		} elseif ( ! empty( $_GET ) ) {
 			$payload = $_GET;
 		} else {
