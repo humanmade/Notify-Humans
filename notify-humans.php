@@ -94,11 +94,22 @@ class Notify_Humans {
 	/**
 	 * Start a new recipe
 	 *
-	 * @param string      $event     Event to start the recipe with
+	 * @param string      	$event     	Event to start the recipe with
+	 * @param int 			$occurrences	Minimum occurances of an event in $timeframe
+	 * @paran string 		$timeframe  Timeframe for $occurrences to be in. E.g. '5 minutes'
+	 * @param callable 		$filter_callback arbitrary "filter" callback to to more advanced matching against the event.
+	 * @return Notify_Humans
 	 */
-	public function if_event( $event ) {
+	public function if_event( $event, $occurrences = null, $timeframe = null, $filter_callback = null ) {
 		$recipe = new Notify_Recipe;
 		$recipe->set_event( $event );
+
+		if ( $occurrences )
+			$recipe->set_occurrences( $occurrences, $timeframe );
+
+		if ( $filter_callback )
+			$recipe->set_filter_callback( $filter_callback );
+
 		$this->data['current_recipe'] = $recipe;
 		return self::$instance;
 	}
@@ -137,10 +148,45 @@ class Notify_Humans {
 		if ( ! is_a( $event, 'Notify_Event' ) )
 			return new WP_Error( 'invalid-event', __( 'Event is not valid.', 'notify-humans' ) );
 
-		$actions = wp_filter_object_list( $this->data['recipes'], array( 'event' => $event->get_slug() ) );
+		$recipes = wp_filter_object_list( $this->data['recipes'], array( 'event' => $event->get_slug() ) );
+
+		// recipes have "filters" which we need to consider
+		$recipes = array_filter( $recipes, function( $recipe ) use ( $event ) {
+
+			// if the recipe has an occurances filter, makes sure we meet that
+			if ( $recipe->occurrences ) {
+
+				$events = Notify_Event::query( array( 'slug' => $event->get_slug(), 'timestamp_query' => array( 'operator' => '>=', 'timestamp' => strtotime( '-' . $recipe->occurrences[1] ) ) ) );
+
+				if ( count( $events ) < $recipe->occurrences[0] )
+					return false;
+			
+			} else {
+				$events = array( $event );
+			}
+
+			// if the recipe has a filter callback, send the events found to that callback
+			if ( $recipe->filter_callback ) {
+
+				$events = array_filter( $events, function( $event ) use ( $recipe ) {
+
+					return call_user_func( $recipe->filter_callback, $event );
+				} );
+
+				if ( ! $events )
+					return false;
+
+				// if it's there is an occurance filter too, re-check we meet that requirement
+				if ( $recipe->occurrences && count( $events ) < $recipe->occurrences[0] )
+					return false;
+			}
+
+			return true;
+
+		} );
 
 		$ret = array();
-		foreach( $actions as $recipe ) {
+		foreach( $recipes as $recipe ) {
 			$func_ret = call_user_func_array( $recipe->action, array( $event ) );
 			if ( is_wp_error( $func_ret ) )
 				$ret[] = $func_ret;
