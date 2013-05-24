@@ -35,6 +35,18 @@ class Notify_Event {
 	}
 
 	/**
+	 * Get the timestamp then the event has created
+	 * 
+	 * @return int
+	 */
+	public function get_timestamp() {
+		if ( ! empty( $this->data->timestamp ) )
+			return strtotime( $this->data->timestamp );
+		else
+			return null; 
+	}
+
+	/**
 	 * Get the payload for this event
 	 */
 	public function get_payload() {
