@@ -77,6 +77,7 @@ class Notify_Event {
 			$data['remote_ip'] = ip2long( $data['remote_ip'] );
 
 		if ( empty( $data['id'] ) ) {
+			unset( $data['id'] );
 			$ret = $wpdb->insert( $wpdb->notify_events, $data );
 			$data['id'] = (int) $wpdb->insert_id;
 		} else {
