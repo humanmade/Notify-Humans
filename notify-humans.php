@@ -59,6 +59,7 @@ class Notify_Humans {
 
 		// Reusable actions
 		require_once( $this->plugin_dir . 'inc/class-notify-irc-action.php' );
+		require_once( $this->plugin_dir . 'inc/class-notify-hipchat-action.php' );
 
 		require_once( $this->plugin_dir . 'inc/class-notify-humans-of-events.php' );
 
