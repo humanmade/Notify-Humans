@@ -16,3 +16,6 @@ If Then, Then That... for your applications.
 
 == Changelog ==
 
+## Contribution guidelines ##
+
+see https://github.com/humanmade/Notify-Humans/blob/master/CONTRIBUTING.md
