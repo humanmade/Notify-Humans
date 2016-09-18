@@ -6,6 +6,8 @@ class Notify_Recipe {
 
 	public $event;
 	public $action;
+	public $occurrences;
+	public $filter_callback;
 
 	public function __construct() {
 		/** Silence is golden. **/
@@ -18,6 +20,14 @@ class Notify_Recipe {
 	 */
 	public function set_event( $event ) {
 		$this->event = $event;
+	}
+
+	public function set_occurrences( $occurrences, $timeframe ) {
+		$this->occurrences = array( $occurrences, $timeframe );
+	}
+
+	public function set_filter_callback( $filter ) {
+		$this->filter_callback = $filter;
 	}
 
 	/**

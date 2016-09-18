@@ -35,6 +35,18 @@ class Notify_Event {
 	}
 
 	/**
+	 * Get the timestamp then the event has created
+	 * 
+	 * @return int
+	 */
+	public function get_timestamp() {
+		if ( ! empty( $this->data->timestamp ) )
+			return strtotime( $this->data->timestamp );
+		else
+			return null; 
+	}
+
+	/**
 	 * Get the payload for this event
 	 */
 	public function get_payload() {
@@ -109,6 +121,37 @@ class Notify_Event {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Query for events by filter params
+	 * 
+	 * @param $args array
+	 * @return Notify_Event[]
+	 */
+	public static function query( $args ) {
+		global $wpdb;
+
+		$query = "SELECT id FROM $wpdb->notify_events WHERE 1 = 1";
+
+		if ( ! empty( $args['slug'] ) )
+			$query .= $wpdb->prepare( " AND slug = %s", $args['slug'] );
+
+		if ( ! empty( $args['timestamp_query'] ) ) {
+
+			if ( empty( $args['timestamp_query']['operator'] ) || ! in_array( $args['timestamp_query']['operator'], array( '=', '>', '>=', '<', '<=' ) ) )
+				$args['timestamp_query']['operator'] = '=';
+
+			$query .= $wpdb->prepare( " AND timestamp {$args['timestamp_query']['operator']} %s", date( 'Y-m-d H:i:s', $args['timestamp_query']['timestamp'] ) );
+		}
+
+		$events = $wpdb->get_results( $query );
+
+		foreach ( $events as &$event )
+			$event = new Notify_Event( $event );
+
+		return $events;
+
 	}
 
 }
